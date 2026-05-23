@@ -80,7 +80,7 @@ fun RestaurantScreen(){
                     val currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm:ss"))
 
                     waitingList.add( customerName )
-                    customersTime[newCustomer] = currentTime
+                    customersTime[newCustomer] = currentTime // new change
 
                     welcomeMessage = "$customerName added to waiting list"
                     customerName = ""
