@@ -21,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,7 +52,8 @@ fun RestaurantScreen(){
     val seatedHistory = remember  { mutableStateListOf<String>() }
     var customerName: String by remember {mutableStateOf(value= "") }
     var welcomeMessage: String by remember {mutableStateOf(value= "") }
-    val customersTime = remember { mutableStateMapOf<String, String>()}
+    val customersTime = remember { linkedMapOf<String, String>()}
+//    val customersTime = remember { mutableStateMapOf<String, String>()}   // this will not remember the order of insert
     // end of VARIABLE DECLARATION SECTION
 
     Column( // COLUMN1
@@ -80,7 +80,7 @@ fun RestaurantScreen(){
                     val currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm:ss"))
 
                     waitingList.add( customerName )
-                    customersTime[newCustomer] = currentTime // new change
+                    customersTime[newCustomer] = currentTime
 
                     welcomeMessage = "$customerName added to waiting list"
                     customerName = ""
@@ -95,7 +95,13 @@ fun RestaurantScreen(){
 
         Button( // ADDVIPCUSTOMER
             onClick = {
+                for (vipCustomerName in vipCustomer){
+                    val currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm:ss"))
+                    customersTime[vipCustomerName] = currentTime
+                }
                 waitingList.addAll(vipCustomer)
+
+
                 welcomeMessage = "VIP Customers added"
             },
             modifier = Modifier.fillMaxWidth()
@@ -119,7 +125,12 @@ fun RestaurantScreen(){
         Spacer(modifier = Modifier.height( 16.dp ))
 
         if ( welcomeMessage.isNotBlank() ) {
-            Text(text = "Message: $welcomeMessage", style = MaterialTheme.typography.headlineSmall, color=Color.Red)
+            if (welcomeMessage == "Please enter a name, can not be blank"){
+                Text(text = "Invalid input: $welcomeMessage", style = MaterialTheme.typography.headlineSmall, color=Color.Red)
+            } else {
+                Text(text = "Message: $welcomeMessage", style = MaterialTheme.typography.headlineSmall)
+
+            }
         } // end of if statement for welcome message
 
         Spacer(modifier = Modifier.height( 16.dp ))
@@ -167,24 +178,21 @@ fun RestaurantScreen(){
 
         Spacer(modifier = Modifier.height( 16.dp ))
 
-        Card( modifier = Modifier.fillMaxWidth() ){
+        Card( modifier = Modifier.fillMaxWidth() ){ // ARRIVALTIME
             Column( modifier = Modifier.padding( 16.dp )){
                 Text("Customer Arrival Time")
                 if (customersTime.isNotEmpty()){
-                    customersTime.forEach { (customer, time) ->
+                    customersTime.entries.toList().reversed().forEach { (customer, time) ->
                         Text("$customer - Arrived at : $time")
                     }
                 } else {
                     Text("No customer data yet")
                 }
             }
-        }
-
+        } // end of card - ARRIVALTIME
     } // end of column - COLUMN1
 }
 
-
-//
 @Preview(showBackground = true)
 @Composable
 fun RestaurantScreenPreview(){
